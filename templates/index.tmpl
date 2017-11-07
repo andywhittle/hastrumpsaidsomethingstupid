@@ -1,0 +1,15 @@
+<html>
+  {{ if .Headlines }}
+    {{ template "yup.html" }}
+    <h2>Headlines</h2>
+    <ul>
+    {{ range .Headlines }}
+      <li>
+      {{ . }}
+      </li>
+      {{ end }}
+    </ul>
+  {{ else }}
+    {{ template "na.html" }}
+  {{ end }}
+</html>
