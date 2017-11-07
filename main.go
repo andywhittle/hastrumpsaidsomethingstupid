@@ -10,7 +10,10 @@ import (
 func main() {
 	router := gin.Default()
 	router.Static("/images", "./images")
+	router.StaticFile("/yup", "templates/yup.html")
+	router.StaticFile("/na", "templates/na.html")
 	router.LoadHTMLGlob("templates/*")
+
 	router.GET("/", func(c *gin.Context) {
 		s := search.BBCNewsSearch{Keyword: "trump"}
 		c.HTML(
@@ -22,9 +25,6 @@ func main() {
 				s.Headlines(),
 			})
 	})
-
-	router.StaticFile("/yup", "templates/yup.html")
-	router.StaticFile("/na", "templates/na.html")
 
 	router.Run(":8898")
 }
