@@ -10,14 +10,17 @@ import (
 
 const url = "http://www.bbc.co.uk/news"
 
+// BBCNewsPage holds the query data for the BBC News landing page
 type BBCNewsPage struct {
 	Titles []string `goquery:"h3.gs-c-promo-heading__title"`
 }
 
+// BBCNews search struct
 type BBCNews struct {
 	Keyword string
 }
 
+// Headlines returns all matching headlines to keyword
 func (bns *BBCNews) Headlines() []string {
 	res, err := http.Get(url)
 	if err != nil {
