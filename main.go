@@ -2,12 +2,16 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/andywhittle/hastrumpsaidsomethingstupid/search"
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
+const timeout = 10 * time.Second
+
+// Router builds the gin engine routing for the app
+func Router(client *http.Client) *gin.Engine {
 	router := gin.Default()
 	router.Static("/images", "./images")
 	router.StaticFile("/yup", "templates/yup.html")
@@ -15,7 +19,7 @@ func main() {
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", func(c *gin.Context) {
-		s := search.NewBBCNews("trump")
+		s := search.BBCNews{Client: client, Keyword: "trump"}
 		c.HTML(
 			http.StatusOK,
 			"index.tmpl",
@@ -26,5 +30,10 @@ func main() {
 			})
 	})
 
-	router.Run(":8898")
+	return router
+}
+
+func main() {
+	c := http.Client{Timeout: timeout}
+	Router(&c).Run(":8898")
 }

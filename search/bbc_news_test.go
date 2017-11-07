@@ -9,14 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewBBCNewsSearch(t *testing.T) {
-	k := "test"
-	s := NewBBCNews(k)
-
-	assert.Equal(t, s.Keyword, k)
-	assert.IsType(t, &http.Client{}, s.client)
-}
-
 func TestBBCNewsSearchHeadlines(t *testing.T) {
 	var tests = []struct {
 		desc    string
@@ -49,7 +41,7 @@ func TestBBCNewsSearchHeadlines(t *testing.T) {
 		defer r.Stop()
 
 		c := &http.Client{Transport: r}
-		s := BBCNews{client: c, Keyword: test.keyword}
+		s := BBCNews{Client: c, Keyword: test.keyword}
 
 		// subject
 		assert.Equal(t, test.expected, s.Headlines(), test.desc)
