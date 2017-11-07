@@ -4,11 +4,15 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/andrewstuart/goq"
 )
 
-const url = "http://www.bbc.co.uk/news"
+const (
+	url     = "http://www.bbc.co.uk/news"
+	timeout = 10 * time.Second
+)
 
 // BBCNewsPage holds the query data for the BBC News landing page
 type BBCNewsPage struct {
@@ -17,12 +21,18 @@ type BBCNewsPage struct {
 
 // BBCNews search struct
 type BBCNews struct {
+	client  *http.Client
 	Keyword string
+}
+
+func NewBBCNews(keyword string) *BBCNews {
+	c := http.Client{Timeout: timeout}
+	return &BBCNews{client: &c, Keyword: keyword}
 }
 
 // Headlines returns all matching headlines to keyword
 func (bns *BBCNews) Headlines() []string {
-	res, err := http.Get(url)
+	res, err := bns.client.Get(url)
 	if err != nil {
 		log.Fatal(err)
 	}
