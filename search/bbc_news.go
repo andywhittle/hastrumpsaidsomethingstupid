@@ -31,12 +31,12 @@ func (bns *BBCNewsSearch) Headlines() []string {
 		log.Fatal(err)
 	}
 
-	trumpHeadlines := []string{}
+	headlines := []string{}
 	for _, title := range page.Titles {
 		if strings.Contains(strings.ToLower(title), bns.Keyword) {
-			trumpHeadlines = append(trumpHeadlines, title)
+			headlines = append(headlines, title)
 		}
 	}
 
-	return trumpHeadlines
+	return headlines
 }
