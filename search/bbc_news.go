@@ -14,11 +14,11 @@ type BBCNewsPage struct {
 	Titles []string `goquery:"h3.gs-c-promo-heading__title"`
 }
 
-type BBCNewsSearch struct {
+type BBCNews struct {
 	Keyword string
 }
 
-func (bns *BBCNewsSearch) Headlines() []string {
+func (bns *BBCNews) Headlines() []string {
 	res, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)

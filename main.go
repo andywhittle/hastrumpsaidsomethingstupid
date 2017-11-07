@@ -15,7 +15,7 @@ func main() {
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", func(c *gin.Context) {
-		s := search.BBCNewsSearch{Keyword: "trump"}
+		s := search.BBCNews{Keyword: "trump"}
 		c.HTML(
 			http.StatusOK,
 			"index.tmpl",
