@@ -21,16 +21,6 @@ func (f *fakeClient) Get(url string) (resp *http.Response, err error) {
 	return f.Resp, f.Err
 }
 
-func TestNewBBCNews(t *testing.T) {
-	client := &http.Client{}
-	key := "test"
-	s := NewBBCNews(client, key)
-
-	assert.Equal(t, key, s.Keyword)
-	assert.Equal(t, client, s.Client)
-	assert.IsType(t, &goq.Decoder{}, s.Decoder(bytes.NewBufferString("test")))
-}
-
 type fakeDecoder struct {
 }
 
@@ -112,5 +102,34 @@ func TestBBCNewsSearchHeadlines(t *testing.T) {
 			assert.Equal(t, test.expected, hl, test.desc)
 			assert.Nil(t, err, test.desc)
 		}
+	}
+}
+
+func TestDecodeBody(t *testing.T) {
+	fd := func(b io.Reader) Decodeable { return fakeDecoder{} }
+	var tests = []struct {
+		desc   string
+		decode func(b io.Reader) Decodeable
+
+		expected interface{}
+	}{
+		{
+			"Given no decoder is defined",
+			nil,
+
+			&goq.Decoder{},
+		},
+		{
+			"Given a decoder is defined",
+			fd,
+
+			fakeDecoder{},
+		},
+	}
+
+	for _, test := range tests {
+		s := BBCNews{Decoder: test.decode}
+		r := bytes.NewBufferString("test")
+		assert.IsType(t, test.expected, s.DecodeBody(r))
 	}
 }

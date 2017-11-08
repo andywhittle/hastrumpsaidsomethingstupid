@@ -39,15 +39,6 @@ type Decodeable interface {
 // ensure that the goq decoder is decodeable
 var _ Decodeable = &goq.Decoder{}
 
-// NewBBCNews initialise a new BBC News search
-func NewBBCNews(client Gettable, key string) *BBCNews {
-	return &BBCNews{
-		Client:  client,
-		Keyword: key,
-		Decoder: func(b io.Reader) Decodeable { return goq.NewDecoder(b) },
-	}
-}
-
 // Headlines returns all matching headlines to keyword
 func (bns *BBCNews) Headlines() ([]string, error) {
 	res, err := bns.Client.Get(url)
@@ -57,7 +48,7 @@ func (bns *BBCNews) Headlines() ([]string, error) {
 	defer res.Body.Close()
 
 	var page BBCNewsPage
-	err = bns.Decoder(res.Body).Decode(&page)
+	err = bns.DecodeBody(res.Body).Decode(&page)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to decode BBC news search body")
 	}
@@ -70,4 +61,13 @@ func (bns *BBCNews) Headlines() ([]string, error) {
 	}
 
 	return headlines, nil
+}
+
+// DecodeBody decodes the response body into a decodeable satisfiable interface
+func (bns *BBCNews) DecodeBody(r io.Reader) Decodeable {
+	if bns.Decoder != nil {
+		return bns.Decoder(r)
+	}
+
+	return goq.NewDecoder(r)
 }

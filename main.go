@@ -19,7 +19,7 @@ func Router(client search.Gettable) *gin.Engine {
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", func(c *gin.Context) {
-		s := search.NewBBCNews(client, "trump")
+		s := search.BBCNews{Client: client, Keyword: "trump"}
 		hl, err := s.Headlines()
 		if err != nil {
 			c.Status(http.StatusInternalServerError)
