@@ -11,7 +11,7 @@ import (
 const timeout = 10 * time.Second
 
 // Router builds the gin engine routing for the app
-func Router(client *http.Client) *gin.Engine {
+func Router(client search.Gettable) *gin.Engine {
 	router := gin.Default()
 	router.Static("/images", "./images")
 	router.StaticFile("/yup", "templates/yup.html")
@@ -19,15 +19,17 @@ func Router(client *http.Client) *gin.Engine {
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", func(c *gin.Context) {
-		s := search.BBCNews{Client: client, Keyword: "trump"}
-		c.HTML(
-			http.StatusOK,
-			"index.tmpl",
-			struct {
-				Headlines []string
-			}{
-				s.Headlines(),
-			})
+		s := search.NewBBCNews(client, "trump")
+		hl, err := s.Headlines()
+		if err != nil {
+			c.Status(http.StatusInternalServerError)
+		} else {
+			c.HTML(
+				http.StatusOK,
+				"index.tmpl",
+				struct{ Headlines []string }{hl},
+			)
+		}
 	})
 
 	return router

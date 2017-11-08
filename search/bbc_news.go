@@ -1,11 +1,12 @@
 package search
 
 import (
-	"log"
+	"io"
 	"net/http"
 	"strings"
 
 	"github.com/andrewstuart/goq"
+	"github.com/pkg/errors"
 )
 
 const url = "http://www.bbc.co.uk/news"
@@ -17,22 +18,48 @@ type BBCNewsPage struct {
 
 // BBCNews search struct
 type BBCNews struct {
-	Client  *http.Client
+	Client  Gettable
+	Decoder func(io.Reader) Decodeable
 	Keyword string
 }
 
+// Gettable interface that can be satisfied by http client
+type Gettable interface {
+	Get(string) (*http.Response, error)
+}
+
+// ensure that http client adheres to gettable
+var _ Gettable = &http.Client{}
+
+// Decodeable is an interface to wrap decode on goq for testing
+type Decodeable interface {
+	Decode(interface{}) error
+}
+
+// ensure that the goq decoder is decodeable
+var _ Decodeable = &goq.Decoder{}
+
+// NewBBCNews initialise a new BBC News search
+func NewBBCNews(client Gettable, key string) *BBCNews {
+	return &BBCNews{
+		Client:  client,
+		Keyword: key,
+		Decoder: func(b io.Reader) Decodeable { return goq.NewDecoder(b) },
+	}
+}
+
 // Headlines returns all matching headlines to keyword
-func (bns *BBCNews) Headlines() []string {
+func (bns *BBCNews) Headlines() ([]string, error) {
 	res, err := bns.Client.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.Wrap(err, "failed to fetch BBC news search")
 	}
 	defer res.Body.Close()
 
 	var page BBCNewsPage
-	err = goq.NewDecoder(res.Body).Decode(&page)
+	err = bns.Decoder(res.Body).Decode(&page)
 	if err != nil {
-		log.Fatal(err)
+		return nil, errors.Wrap(err, "failed to decode BBC news search body")
 	}
 
 	headlines := []string{}
@@ -42,5 +69,5 @@ func (bns *BBCNews) Headlines() []string {
 		}
 	}
 
-	return headlines
+	return headlines, nil
 }
