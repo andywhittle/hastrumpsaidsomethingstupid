@@ -29,8 +29,6 @@ func (fd fakeDecoder) Decode(interface{}) error {
 }
 
 func TestBBCNewsSearchHeadlines(t *testing.T) {
-	dec := func(b io.Reader) Decodeable { return goq.NewDecoder(b) }
-
 	var tests = []struct {
 		desc     string
 		keyword  string
@@ -46,7 +44,7 @@ func TestBBCNewsSearchHeadlines(t *testing.T) {
 			"trump",
 			`<h3 class="gs-c-promo-heading__title gel-pica-bold nw-o-link-split__text">trump said something ridiculous</h3>`,
 			nil,
-			dec,
+			nil,
 
 			[]string{"trump said something ridiculous"},
 			nil,
@@ -56,7 +54,7 @@ func TestBBCNewsSearchHeadlines(t *testing.T) {
 			"trump",
 			`<h3 class="gs-c-promo-heading__title gel-pica-bold nw-o-link-split__text">some other headline</h3>`,
 			nil,
-			dec,
+			nil,
 
 			[]string{},
 			nil,
@@ -66,7 +64,7 @@ func TestBBCNewsSearchHeadlines(t *testing.T) {
 			"trump",
 			"",
 			errors.New("some error"),
-			dec,
+			nil,
 
 			[]string{},
 			errors.New("failed to fetch BBC news search: some error"),
